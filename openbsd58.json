@@ -95,7 +95,8 @@
         {
             "type": "shell",
             "environment_vars": [
-                "ADMIN_USERNAME={{user `admin_username`}}"
+                "ADMIN_USERNAME={{user `admin_username`}}",
+                "PACKAGE_MIRROR={{user `package_mirror`}}"
             ],
             "scripts": [
                 "scripts/authorized_keys.sh",
@@ -117,6 +118,7 @@
         "name": "openbsd58",
         "network": null,
         "numvcpu": "1",
+        "package_mirror": "http://mirror.esc7.net/pub/OpenBSD/",
         "timezone": "US/Central",
         "vm_datastore": "datastore1",
         "vm_host": null,
