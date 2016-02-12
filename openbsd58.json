@@ -23,14 +23,14 @@
                 "numvcpus": "{{user `numvcpu`}}",
                 "cpuid.coresPerSocket": "1",
                 "ethernet0.networkName": "{{user `network`}}",
-                "ethernet0.virtualDev": "vmxnet3",
+                "ethernet0.virtualDev": "{{user `network_controller`}}",
                 "isolation.tools.diskWiper.disable": "TRUE",
                 "isolation.tools.diskShrink.disable": "TRUE",
                 "isolation.device.connectable.disable": "TRUE",
                 "isolation.device.edit.disable": "TRUE",
                 "log.rotateSize": "1048576",
                 "log.keepOld": "10",
-                "scsi0.virtualDev": "pvscsi"
+                "scsi0.virtualDev": "{{user `disk_controller`}}"
             },
             "vmx_data_post": {
                 "remotedisplay.vnc.enabled": "FALSE"
@@ -39,13 +39,10 @@
             "boot_wait": "20s",
             "boot_command": [
                 "<wait10>",
-                "S<enter><wait>",
-                "fdisk -iy sd0<enter><wait>",
-                "exit<enter><wait10>",
                 "I<enter><wait>",
                 "default<enter><wait>",
                 "{{user `name`}}<enter><wait>",
-                "vmx0<enter><wait>",
+                "{{user `network_device`}}<enter><wait>",
                 "dhcp<enter><wait10>",
                 "none<enter><wait>",
                 "done<enter><wait>",
@@ -110,6 +107,7 @@
         "admin_description": null,
         "admin_password": null,
         "admin_username": null,
+        "disk_controller": "lsisas1068",
         "disk_size": "16384",
         "iso_checksum": "9f0a94277f655e248f9bae69f8090088",
         "iso_checksum_type": "md5",
@@ -117,6 +115,8 @@
         "memsize": "512",
         "name": "openbsd58",
         "network": null,
+        "network_controller": "vmxnet3",
+        "network_device": "vmx0",
         "numvcpu": "1",
         "package_mirror": "http://mirror.esc7.net/pub/OpenBSD/",
         "timezone": "US/Central",
