@@ -1,0 +1,111 @@
+{
+    "builders": [
+        {
+            "type": "vmware-iso",
+            "vm_name": "{{user `name`}}",
+            "guest_os_type": "Ubuntu-64",
+            "disk_size": "{{user `disk_size`}}",
+            "disk_type_id": "thin",
+            "iso_url": "{{user `iso_url`}}",
+            "iso_checksum": "{{user `iso_checksum`}}",
+            "iso_checksum_type": "{{user `iso_checksum_type`}}",
+            "ssh_wait_timeout": "120m",
+            "ssh_username": "{{user `admin_username`}}",
+            "ssh_password": "{{user `admin_password`}}",
+            "http_directory": "www",
+            "output_directory": "{{user `name`}}",
+            "remote_type": "esxi5",
+            "remote_datastore": "{{user `vm_datastore`}}",
+            "remote_host": "{{user `vm_host`}}",
+            "remote_username": "{{user `vm_username`}}",
+            "remote_password": "{{user `vm_password`}}",
+            "vmdk_name": "{{user `name`}}",
+            "vmx_data": {
+                "memsize": "{{user `memsize`}}",
+                "numvcpus": "{{user `numvcpu`}}",
+                "cpuid.coresPerSocket": "1",
+                "ethernet0.networkName": "{{user `network`}}",
+                "ethernet0.virtualDev": "{{user `network_controller`}}",
+                "isolation.tools.diskWiper.disable": "TRUE",
+                "isolation.tools.diskShrink.disable": "TRUE",
+                "isolation.device.connectable.disable": "TRUE",
+                "isolation.device.edit.disable": "TRUE",
+                "log.rotateSize": "1048576",
+                "log.keepOld": "10",
+                "scsi0.virtualDev": "{{user `disk_controller`}}"
+            },
+            "vmx_data_post": {
+                "remotedisplay.vnc.enabled": "FALSE"
+            },
+            "vnc_port_min": 5988,
+            "boot_wait": "5s",
+            "boot_command": [
+                "<esc><esc><enter><wait>",
+                "/install/vmlinuz noapic ",
+                "auto=true url={{ .HTTPIP }}:{{ .HTTPPort }} fb=false ",
+                "netcfg/hostname={{user `name`}} ",     
+                "netcfg/get_hostname={{user `name`}} ", 
+                "netcfg/get_domain={{user `domain`}} ",
+                "mirror/http/hostname={{user `apt_mirror`}} ",
+                "apt-setup/security_host={{user `apt_mirror`}} ",
+                "base-installer/kernel/override-image={{user `kernel-package`}} ",
+                "passwd/username={{user `admin_username`}} ",
+                "passwd/user-fullname=\"{{user `admin_description`}}\" ",
+                "passwd/user-password=\"{{user `admin_password`}}\" ",
+                "passwd/user-password-again=\"{{user `admin_password`}}\" ",
+                "time/zone=\"{{user `timezone`}}\" ",
+                "preseed/late_command=\"",
+                "in-target wget -q -O /tmp/postinstall.sh http://{{ .HTTPIP }}:{{ .HTTPPort }}{{user `postinstall`}} ; ",
+                "in-target /bin/sh /tmp/postinstall.sh {{user `admin_username`}} {{user `kernel-package`}}; ",
+                "\" ",
+                "initrd=/install/initrd.gz -- <enter>"
+            ],
+            "shutdown_command": "sudo shutdown -P now"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "files/authorized_keys",
+            "destination": "/tmp/authorized_keys"
+        },
+        {
+            "type": "shell",
+            "environment_vars": [
+                "ADMIN_USERNAME={{user `admin_username`}}",
+                "GEM_MIRROR={{user `gem_mirror`}}"
+            ],
+            "scripts": [
+                "scripts/authorized_keys.sh",
+                "scripts/ubuntu/puppet-gem.sh",
+                "scripts/ubuntu/cleanup.sh"
+            ]
+        }
+    ],
+    "variables": {
+        "admin_description": null,
+        "admin_password": null,
+        "admin_username": null,
+        "apt_mirror": "mirror.pnl.gov",
+        "domain": null,
+        "disk_size": "32768",
+        "disk_controller": "pvscsi",
+        "gem_mirror": "https://rubygems.org",
+        "iso_checksum": null,
+        "iso_checksum_type": null,
+        "iso_url": null,
+        "kernel-package": "linux-virtual",
+        "memsize": "1024",
+        "network": "VM Network",
+        "network_controller": "vmxnet3",
+        "name": null,
+        "numvcpu": "1",
+        "postinstall": "/d-i/postinstall.sh",
+        "puppet_version": "3.8.5",
+        "timezone": "US/Central",
+        "vm_datastore": "datastore1",
+        "vm_host": null,
+        "vm_username": "root",
+        "vm_password": null
+    }
+}
